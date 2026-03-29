@@ -33,13 +33,13 @@ if [[ $# -eq 0 ]]; then
 fi
 
 if [[ ! -d "${KERNEL_SRC}/.git" ]]; then
-  echo -e "${RED}ERROR:${RESET} Kernel source not found at ${KERNEL_SRC}" >&2
+  printf "%s\n" "${RED}ERROR:${RESET} Kernel source not found at ${KERNEL_SRC}" >&2
   echo "       Run ./kernel/fetch.sh first." >&2
   exit 1
 fi
 
 KERNEL_VERSION=$(make -s -C "${KERNEL_SRC}" kernelversion 2>/dev/null || echo "unknown")
-echo -e "${BOLD}Kernel tree:${RESET} ${KERNEL_SRC} (${KERNEL_VERSION})"
+printf "%s\n" "${BOLD}Kernel tree:${RESET} ${KERNEL_SRC} (${KERNEL_VERSION})"
 echo ""
 
 # ── Per-patch check ───────────────────────────────────────────────────────────
@@ -49,31 +49,29 @@ check_patch() {
   local detail=""
 
   if [[ ! -f "${patch_file}" ]]; then
-    echo -e "  ${RED}NOT FOUND:${RESET} ${patch_file}"
+    printf "%s\n" "  ${RED}NOT FOUND:${RESET} ${patch_file}"
     return
   fi
 
-  echo -e "${BOLD}Checking:${RESET} ${patch_file}"
+  printf "%s\n" "${BOLD}Checking:${RESET} ${patch_file}"
 
   # 1. Extract subject line from patch header
-  local subject
+  local subject changed_files upstream_status
   subject=$(grep -m1 '^Subject:' "${patch_file}" 2>/dev/null \
     | sed 's/^Subject:[[:space:]]*//' \
     | sed 's/\[PATCH[^]]*\][[:space:]]*//' \
     | tr -d '\r')
 
   # 2. Extract first meaningful function/symbol changed (from diff --git lines)
-  local changed_files
   changed_files=$(grep '^diff --git' "${patch_file}" 2>/dev/null \
     | sed 's|diff --git a/||' | awk '{print $1}' | head -5)
 
   # 3. Check UPSTREAM STATUS line in patch header (our own annotation)
-  local upstream_status
   upstream_status=$(grep -i '^UPSTREAM STATUS:' "${patch_file}" 2>/dev/null \
     | head -1 | sed 's/^UPSTREAM STATUS:[[:space:]]*//')
 
   if [[ -n "${upstream_status}" ]]; then
-    echo -e "  ${CYAN}Annotated:${RESET} ${upstream_status}"
+    printf "%s\n" "  ${CYAN}Annotated:${RESET} ${upstream_status}"
   fi
 
   # 4. Try dry-run apply to see if patch applies cleanly
@@ -86,37 +84,33 @@ check_patch() {
   fi
 
   # 5. Search git log for subject keywords
-  local git_match=""
+  local git_match="" symbol_match="" search_term first_file basename_file
   if [[ -n "${subject}" ]]; then
-    # Use first 6+ words of subject for search to avoid false positives
-    local search_term
+    # Use first 8 words of subject for search to avoid false positives
     search_term=$(echo "${subject}" | awk '{for(i=1;i<=NF&&i<=8;i++) printf $i" "; print ""}' | sed 's/[[:space:]]*$//')
     git_match=$(git -C "${KERNEL_SRC}" log --oneline --all \
       --grep="${search_term}" 2>/dev/null | head -3)
   fi
 
   # 6. Search for key symbols from changed files in git log
-  local symbol_match=""
   if [[ -z "${git_match}" && -n "${changed_files}" ]]; then
-    local first_file
     first_file=$(echo "${changed_files}" | head -1)
-    local basename_file
     basename_file=$(basename "${first_file}" .c)
     symbol_match=$(git -C "${KERNEL_SRC}" log --oneline --all \
       --grep="${basename_file}" 2>/dev/null | head -3)
   fi
 
   # ── Interpret results ──────────────────────────────────────────────────────
-  echo -e "  Subject    : ${subject:-<not found>}"
-  echo -e "  Dry-run    : ${apply_result}"
+  printf "%s\n" "  Subject    : ${subject:-<not found>}"
+  printf "%s\n" "  Dry-run    : ${apply_result}"
 
   if [[ "${apply_result}" == "DOES_NOT_APPLY" ]]; then
     if [[ -n "${git_match}" ]]; then
       result="UPSTREAM"
       detail="Patch does not apply — likely already merged"
-      echo -e "  Git match  :"
+      printf "%s\n" "  Git match  :"
       echo "${git_match}" | while read -r line; do
-        echo -e "               ${CYAN}${line}${RESET}"
+        printf "%s\n" "               ${CYAN}${line}${RESET}"
       done
     else
       result="NEEDS_REBASE"
@@ -126,9 +120,9 @@ check_patch() {
     if [[ -n "${git_match}" ]]; then
       result="DUPLICATE_RISK"
       detail="Patch applies cleanly but git log matches found — verify it isn't already applied"
-      echo -e "  Git match  :"
+      printf "%s\n" "  Git match  :"
       echo "${git_match}" | while read -r line; do
-        echo -e "               ${YELLOW}${line}${RESET}"
+        printf "%s\n" "               ${YELLOW}${line}${RESET}"
       done
     else
       result="APPLICABLE"
@@ -139,22 +133,22 @@ check_patch() {
   # ── Print verdict ──────────────────────────────────────────────────────────
   case "${result}" in
     UPSTREAM)
-      echo -e "  ${GREEN}Result     : UPSTREAM — already in kernel tree${RESET}"
+      printf "%s\n" "  ${GREEN}Result     : UPSTREAM — already in kernel tree${RESET}"
       ;;
     APPLICABLE)
-      echo -e "  ${GREEN}Result     : APPLICABLE — can be applied${RESET}"
+      printf "%s\n" "  ${GREEN}Result     : APPLICABLE — can be applied${RESET}"
       ;;
     NEEDS_REBASE)
-      echo -e "  ${YELLOW}Result     : NEEDS REBASE — does not apply cleanly${RESET}"
+      printf "%s\n" "  ${YELLOW}Result     : NEEDS REBASE — does not apply cleanly${RESET}"
       ;;
     DUPLICATE_RISK)
-      echo -e "  ${YELLOW}Result     : VERIFY — applies but upstream match exists${RESET}"
+      printf "%s\n" "  ${YELLOW}Result     : VERIFY — applies but upstream match exists${RESET}"
       ;;
     *)
-      echo -e "  ${RED}Result     : UNKNOWN${RESET}"
+      printf "%s\n" "  ${RED}Result     : UNKNOWN${RESET}"
       ;;
   esac
-  [[ -n "${detail}" ]] && echo -e "  Detail     : ${detail}"
+  [[ -n "${detail}" ]] && printf "%s\n" "  Detail     : ${detail}"
   echo ""
 }
 
