@@ -1,0 +1,22 @@
+From: Pavel Begunkov <asml.silence@gmail.com>
+Subject: [PATCH] udp/ipv6 optimisations v2 net-next
+Date: Thu Jan 27 00:36:31 2022 +0000
+
+UPSTREAM STATUS: Merged in Linux 5.18
+  Reference: https://lore.kernel.org/all/cover.1643243772.git.asml.silence@gmail.com/
+  This patch is NOT applied on kernels >= 5.18.
+
+Squashed series of UDP/IPv6 sendmsg optimisations:
+  - Partially inline ipv6_fixup_options to avoid overhead when opt is NULL
+  - Optimise dst refcounting on cork init (save two atomics)
+  - Avoid extra copies of iflow in udpv6_sendmsg
+  - Pass flow in ip6_make_skb together with cork
+  - Convert inet_cork argument to inet_cork_full in __ip6_append_data
+  - Don't zero inet_cork_full::fl after use (saves 88-byte memset)
+  - Remove daddr temp buffer in __ip6_make_skb
+  - Optimise dst refcounting on skb init
+
+Signed-off-by: Pavel Begunkov <asml.silence@gmail.com>
+---
+NOTE: This patch file is kept for reference only. The changes are
+already present in Linux 6.x. Do not apply to 6.x kernels.

@@ -1,13 +1,13 @@
 # sched/series — CPU scheduler patches
-# Source: zakuradev/kernel-configuration (CachyOS/cacule scheduler)
-#
-# NOTE: The cacule scheduler was removed from XanMod upstream. Applying it
-# conflicts with XanMod's own scheduler changes. Use with caution and test
-# thoroughly. The BORE and EEVDF schedulers in recent kernels may be preferable.
-#
 # Enable with: ENABLE_CACHY=1
 #
-# Patches to evaluate:
-#   - cachy-scheduler.patch      (cacule + idle balance, from hamadmarri/cacule-cpu-scheduler)
+# Upstream status: The cacule scheduler was removed from XanMod upstream
+# and was never accepted into mainline Linux. The BORE scheduler
+# (Burst-Oriented Response Enhancer) is the current recommended
+# alternative and is included in recent XanMod releases natively.
 #
-# Add filenames below once compatibility with 6.x is confirmed:
+# For 6.x targets, consider using XanMod's built-in BORE scheduler
+# instead of enabling ENABLE_CACHY=1.
+#
+# Uncomment only if you have a verified 6.x-compatible cacule patch:
+# 001-cachy-scheduler.patch

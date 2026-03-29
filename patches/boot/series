@@ -1,10 +1,14 @@
 # boot/series — boot-time patches
-# Source: arglebargle-arch/xanmod-rog-PKGBUILD
-#
 # Enable with: ENABLE_PARALLEL_BOOT=1
 #
-# Patches to port/verify:
-#   - Parallel-boot-v4.patch     (parallel initcall execution, 5.16.5 era)
-#   - implement-threaded-console-printing.patch
+# Upstream status:
+#   Parallel-boot-v4.patch                    — NOT upstream (rejected upstream)
+#   implement-threaded-console-printing.patch  — Partially upstream in 6.2
 #
-# Add filenames below once rebased against 6.x:
+# The parallel boot patch was not accepted upstream due to ordering
+# concerns. The threaded console patch was partially merged in 6.2.
+# Both need evaluation against current 6.x before enabling.
+#
+# Uncomment once rebased and tested:
+# 001-parallel-boot.patch
+# 002-threaded-console.patch

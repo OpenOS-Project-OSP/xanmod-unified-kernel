@@ -1,11 +1,14 @@
 # net/series — network patches
-# Source: arglebargle-arch/xanmod-rog-PKGBUILD
-#
 # Enable with: ENABLE_NET_PATCHES=1
 #
-# Patches to port/verify:
-#   - udp-ipv6-optimisations-v2-net-next.patch
-#   - af_unix-Replace-unix_table_lock-with-per-hash-locks.patch
-#   - cfg80211-dont-WARN-if-a-self-managed-device.patch
+# Upstream status:
+#   001-udp-ipv6-optimisations.patch       — UPSTREAM in 5.18, skip on 6.x
+#   002-af_unix-per-hash-locks.patch       — UPSTREAM in 5.17, skip on 6.x
 #
-# Add filenames below once rebased against 6.x:
+# Both patches are already in 6.x mainline. Kept for reference and LTS use.
+
+# UDP/IPv6 sendmsg optimisations (upstream 5.18 — skip on 6.x)
+# 001-udp-ipv6-optimisations.patch
+
+# AF_UNIX per-hash locks (upstream 5.17 — skip on 6.x)
+# 002-af_unix-per-hash-locks.patch

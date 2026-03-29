@@ -1,17 +1,16 @@
 # hardware/asus-rog/series
-# Source: arglebargle-arch/xanmod-rog-PKGBUILD (originally targeting 5.16.x)
-#
-# STATUS: These patches require rebase against 6.x before use.
-#         Many may already be upstream. Verify each before enabling.
-#
 # Enable with: ENABLE_ROG=1 or profile=rog
 #
-# Patches to port/rebase from arglebargle-arch:
-#   - platform-x86-asus-wmi-Fix-regression-when-probing-for-fan-curve-control.patch
-#   - HID-asus-wmi-ROG-x13-flow-tablet-mode-support.patch
-#   - HID-asus-Reduce-object-size-by-consolidating-calls.patch
-#   - acpi-battery-Always-read-fresh-battery-state-on-update.patch
-#   - 9001-v5.16.11-s0ix-patch.patch  (S0ix modern standby — check upstream status)
-#   - Revert-XANMOD-fair-Remove-all-energy-efficiency-functions.patch (opt-in only)
+# Upstream status summary:
+#   001-asus-wmi-fan-curve-fix.patch   — UPSTREAM in 5.17, skip on 6.x
+#   002-rog-x13-tablet-mode.patch      — NOT upstream, needs 6.x rebase
 #
-# Add rebased patch filenames below once ported:
+# The fan curve fix (001) is already in 6.x mainline. Kept for LTS use only.
+# 002 (ROG x13 tablet mode) requires rebase against current 6.x amd-sfh
+# driver structure before it will apply cleanly. See patch header for details.
+
+# Fan curve probe regression fix (upstream 5.17 — skip on 6.x)
+# 001-asus-wmi-fan-curve-fix.patch
+
+# ROG Flow X13 tablet mode — NOT upstream, uncomment after 6.x rebase
+# 002-rog-x13-tablet-mode.patch

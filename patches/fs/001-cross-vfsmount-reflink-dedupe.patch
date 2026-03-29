@@ -1,0 +1,87 @@
+From: Josef Bacik <josef@toxicpanda.com>
+Subject: [PATCH] fs: allow cross-vfsmount reflink/dedupe
+Date: Fri, 18 Feb 2022 09:38:14 -0500
+
+UPSTREAM STATUS: Merged in Linux 5.18
+  This patch is NOT applied on kernels >= 5.18. Kept for reference
+  and for use on older LTS kernels if needed.
+
+Currently we disallow reflink and dedupe if the two files aren't on the
+same vfsmount. However we really only need to disallow it if they're not
+on the same super block. It is very common for btrfs to have a main
+subvolume that is mounted and then different subvolumes mounted at
+different locations. It's allowed to reflink between these volumes, but
+the vfsmount check disallows this.
+
+Instead fix dedupe to check for the same superblock, and simply remove
+the vfsmount check for reflink as it already does the superblock check.
+
+Reviewed-by: Darrick J. Wong <djwong@kernel.org>
+Reviewed-by: Nikolay Borisov <nborisov@suse.com>
+Reviewed-by: David Sterba <dsterba@suse.com>
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+---
+ fs/btrfs/reflink.c |  4 +---
+ fs/ioctl.c         |  4 ----
+ fs/remap_range.c   |  7 +------
+ 3 files changed, 2 insertions(+), 13 deletions(-)
+
+diff --git a/fs/btrfs/reflink.c b/fs/btrfs/reflink.c
+index e0f93b357548..5804f4af2629 100644
+--- a/fs/btrfs/reflink.c
++++ b/fs/btrfs/reflink.c
+@@ -772,9 +772,7 @@ static int btrfs_remap_file_range_prep(struct file *file_in, loff_t pos_in,
+ 	if (btrfs_root_readonly(root_out))
+ 		return -EROFS;
+ 
+-	if (file_in->f_path.mnt != file_out->f_path.mnt ||
+-	    inode_in->i_sb != inode_out->i_sb)
+-		return -EXDEV;
++	ASSERT(inode_in->i_sb == inode_out->i_sb);
+ }
+ 
+diff --git a/fs/ioctl.c b/fs/ioctl.c
+index 504e69578112..79550f5f4c45 100644
+--- a/fs/ioctl.c
++++ b/fs/ioctl.c
+@@ -236,9 +236,6 @@ static long ioctl_file_clone(struct file *dst_file, unsigned long srcfd,
+ 	if (!src_file.file)
+ 		return -EBADF;
+ 
+-	ret = -EXDEV;
+-	if (src_file.file->f_path.mnt != dst_file->f_path.mnt)
+-		goto fdput;
+ 	cloned = vfs_clone_file_range(src_file.file, off, dst_file, destoff,
+ 				      olen, 0);
+ 	if (cloned < 0)
+@@ -247,7 +244,6 @@ static long ioctl_file_clone(struct file *dst_file, unsigned long srcfd,
+ 		ret = -EINVAL;
+ 	else
+ 		ret = 0;
+-fdput:
+ 	fdput(src_file);
+ 	return ret;
+ }
+diff --git a/fs/remap_range.c b/fs/remap_range.c
+index 6d4a9beaa097..264ec4541a6c 100644
+--- a/fs/remap_range.c
++++ b/fs/remap_range.c
+@@ -368,11 +368,6 @@ loff_t do_clone_file_range(struct file *file_in, loff_t pos_in,
+ 
+ 	WARN_ON_ONCE(remap_flags & REMAP_FILE_DEDUP);
+ 
+-	/*
+-	 * FICLONE/FICLONERANGE ioctls enforce that src and dest files are on
+-	 * the same mount. Practically, they only need to be on the same file
+-	 * system.
+-	 */
+ 	if (file_inode(file_in)->i_sb != file_inode(file_out)->i_sb)
+ 		return -EXDEV;
+ 
+@@ -464,7 +459,7 @@ loff_t vfs_dedupe_file_range_one(struct file *src_file, loff_t src_pos,
+ 	goto out_drop_write;
+ 
+ 	ret = -EXDEV;
+-	if (src_file->f_path.mnt != dst_file->f_path.mnt)
++	if (file_inode(src_file)->i_sb != file_inode(dst_file)->i_sb)
+ 		goto out_drop_write;

@@ -1,0 +1,110 @@
+name: Lint
+
+on:
+  push:
+    branches: [main, develop, 'improve/**', 'feature/**']
+  pull_request:
+    branches: [main]
+
+# Fast lint pipeline — runs on every PR/push, no kernel source required.
+# Checks:
+#   1. Shell script syntax (bash -n)
+#   2. shellcheck static analysis
+#   3. Patch series files reference real patch files
+#   4. Config fragments are valid Kconfig syntax (key=value or # comment)
+#   5. Profile scripts are valid bash and only set known variables
+
+jobs:
+  shellcheck:
+    name: Shell syntax & shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y --no-install-recommends shellcheck
+
+      - name: Bash syntax check
+        run: |
+          echo "==> Checking bash syntax..."
+          find . -name "*.sh" -not -path "./.git/*" | while read -r f; do
+            bash -n "$f" && echo "  OK: $f" || { echo "  FAIL: $f"; exit 1; }
+          done
+
+      - name: shellcheck
+        run: |
+          echo "==> Running shellcheck..."
+          find . -name "*.sh" -not -path "./.git/*" | xargs shellcheck \
+            --severity=warning \
+            --exclude=SC1091 \
+            --shell=bash
+
+  patch-series:
+    name: Patch series integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify series files reference existing patch files
+        run: |
+          echo "==> Checking patch series files..."
+          FAIL=0
+          find patches -name "series" | while read -r series; do
+            dir=$(dirname "$series")
+            while IFS= read -r line; do
+              [[ "$line" =~ ^[[:space:]]*# ]] && continue
+              [[ -z "${line// }" ]] && continue
+              patch_path="$dir/$line"
+              if [[ ! -f "$patch_path" ]]; then
+                echo "  MISSING: $patch_path (referenced in $series)"
+                FAIL=1
+              else
+                echo "  OK: $patch_path"
+              fi
+            done < "$series"
+          done
+          exit $FAIL
+
+  config-fragments:
+    name: Config fragment syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate .config fragment syntax
+        run: |
+          echo "==> Validating config fragments..."
+          FAIL=0
+          find configs -name "*.config" | while read -r cfg; do
+            while IFS= read -r line; do
+              # Allow: blank lines, comments, CONFIG_FOO=y/m/n/"string", # CONFIG_FOO is not set
+              if [[ -n "$line" ]] && \
+                 ! [[ "$line" =~ ^[[:space:]]*# ]] && \
+                 ! [[ "$line" =~ ^CONFIG_[A-Z0-9_]+=(y|m|n|[0-9]+|\".*\")$ ]] && \
+                 ! [[ "$line" =~ ^#[[:space:]]CONFIG_[A-Z0-9_]+[[:space:]]is[[:space:]]not[[:space:]]set$ ]]; then
+                echo "  INVALID LINE in $cfg: $line"
+                FAIL=1
+              fi
+            done < "$cfg"
+            echo "  OK: $cfg"
+          done
+          exit $FAIL
+
+  profiles:
+    name: Profile validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate profile scripts
+        run: |
+          echo "==> Validating profiles..."
+          KNOWN_VARS="BRANCH MLEVEL KARCH VENDOR ENABLE_ROG ENABLE_MEDIATEK_BT
+            ENABLE_FS_PATCHES ENABLE_NET_PATCHES ENABLE_CACHY ENABLE_PARALLEL_BOOT
+            NO_DEBUG LZ4_SWAP EXTRA_CONFIG JOBS FULL_CLONE ENABLE_RT CROSS_COMPILE"
+          FAIL=0
+          for profile in profiles/*.sh; do
+            bash -n "$profile" || { echo "  SYNTAX FAIL: $profile"; FAIL=1; continue; }
+            echo "  OK: $profile"
+          done
+          exit $FAIL

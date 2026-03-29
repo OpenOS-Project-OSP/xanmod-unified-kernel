@@ -1,0 +1,17 @@
+From: Kuniyuki Iwashima <kuniyu@amazon.co.jp>
+Subject: [PATCH] af_unix: Replace unix_table_lock with per-hash locks v3
+Date: Wed Nov 24 11:14:31 2021 +0900
+
+UPSTREAM STATUS: Merged in Linux 5.17
+  Reference: https://lore.kernel.org/all/20211124021431.48956-1-kuniyu@amazon.co.jp/
+  This patch is NOT applied on kernels >= 5.17.
+
+Replaces the global unix_table_lock spinlock with per-hash bucket locks,
+reducing contention on systems with many AF_UNIX sockets. Also relaxes
+the race in unix_autobind() and fixes a potential deadlock in
+unix_state_double_lock().
+
+Signed-off-by: Kuniyuki Iwashima <kuniyu@amazon.co.jp>
+---
+NOTE: This patch file is kept for reference only. The changes are
+already present in Linux 6.x. Do not apply to 6.x kernels.

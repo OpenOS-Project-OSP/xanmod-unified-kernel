@@ -1,16 +1,14 @@
 # hardware/mediatek-bt/series
-# Source: arglebargle-arch/xanmod-rog-PKGBUILD (5.16.x era)
-#
-# MT7921 Bluetooth support patches. Most of these were merged upstream
-# between 5.17 and 5.18. Verify against current kernel before adding.
-#
 # Enable with: ENABLE_MEDIATEK_BT=1
 #
-# Patches to check for upstream status:
-#   - Bluetooth-btusb-Add-Mediatek-MT7921-support-for-Foxconn.patch
-#   - Bluetooth-btusb-Add-Mediatek-MT7921-support-for-IMC-Network.patch
-#   - Bluetooth-btusb-Add-support-for-IMC-Networks-Mediatek-Chip-MT7921.patch
-#   - mt76-mt7921-enable-VO-tx-aggregation.patch
-#   - mt76-mt7921e-fix-possible-probe-failure-after-reboot.patch
+# Upstream status: ALL patches in this set were merged upstream between
+# 5.17 and 5.18. They are present in all 6.x kernels. This directory
+# is kept for reference and for use on older LTS kernels only.
 #
-# Add filenames below once upstream status is confirmed and patches are ported:
+# Patches (all upstream, none applied to 6.x):
+#   - Bluetooth-btusb-Add-Mediatek-MT7921-support-for-Foxconn.patch     (5.17)
+#   - Bluetooth-btusb-Add-Mediatek-MT7921-support-for-IMC-Network.patch (5.17)
+#   - mt76-mt7921-enable-VO-tx-aggregation.patch                        (5.18)
+#   - mt76-mt7921e-fix-possible-probe-failure-after-reboot.patch        (5.17)
+#
+# No patches are active for 6.x targets.
