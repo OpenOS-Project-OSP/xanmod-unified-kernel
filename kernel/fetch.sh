@@ -28,6 +28,10 @@ declare -A BRANCH_MAP=(
   [RT]="6.18-rt"
 )
 
+# EDGE branch note: gitlab.com/xanmod/linux uses the same version number for
+# both MAIN and EDGE but they track different patch sets. If the upstream
+# branch naming changes (e.g. 6.19-edge), update BRANCH_MAP[EDGE] here.
+
 BRANCH="${1:-MAIN}"
 BRANCH="${BRANCH^^}"  # normalize to uppercase
 

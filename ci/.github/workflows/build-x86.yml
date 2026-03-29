@@ -2,10 +2,19 @@ name: Build x86-64
 
 on:
   push:
-    branches: [main]
     tags: ['v*']
+  # Pull requests only trigger on changes to build-affecting files,
+  # not on doc/config/profile-only changes.
   pull_request:
     branches: [main]
+    paths:
+      - 'build.sh'
+      - 'kernel/**'
+      - 'patches/**'
+      - 'configs/**'
+      - 'scripts/**'
+      - '.github/workflows/build-x86.yml'
+  # Manual trigger for on-demand builds
   workflow_dispatch:
     inputs:
       branch:

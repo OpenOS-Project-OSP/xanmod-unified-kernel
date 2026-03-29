@@ -2,10 +2,16 @@ name: Build ARM64
 
 on:
   push:
-    branches: [main]
     tags: ['v*']
   pull_request:
     branches: [main]
+    paths:
+      - 'build.sh'
+      - 'kernel/**'
+      - 'patches/**'
+      - 'configs/base/aarch64.config'
+      - 'scripts/**'
+      - '.github/workflows/build-arm64.yml'
   workflow_dispatch:
     inputs:
       branch:

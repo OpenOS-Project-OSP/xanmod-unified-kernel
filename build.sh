@@ -137,6 +137,7 @@ detect_distro() {
 }
 
 DISTRO="${DISTRO:-$(detect_distro)}"
+export DISTRO
 
 # ── RT branch forces rt.config ────────────────────────────────────────────────
 [[ "${BRANCH}" == "RT" ]] && ENABLE_RT="${ENABLE_RT:-1}" || ENABLE_RT="${ENABLE_RT:-0}"
