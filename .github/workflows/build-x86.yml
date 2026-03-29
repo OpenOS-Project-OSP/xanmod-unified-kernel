@@ -48,7 +48,8 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
             build-essential bc bison flex libssl-dev libelf-dev \
-            libncurses-dev dwarves pahole cpio zstd lz4 git wget curl
+            libncurses-dev dwarves pahole cpio zstd lz4 git wget curl \
+            debhelper-compat=12 libdw-dev
       - name: Fetch XanMod kernel source
         run: ./kernel/fetch.sh ${{ matrix.branch }}
       - name: Apply patches
