@@ -62,9 +62,10 @@ if command -v mkinitrd &>/dev/null; then
     -k "${KERNEL_VERSION}" \
     -f "${ROOT_FS}" \
     -r "${ROOT_DEV}" \
-    -m "$(ls /lib/modules/${KERNEL_VERSION}/kernel/drivers/ata/ \
-          /lib/modules/${KERNEL_VERSION}/kernel/drivers/scsi/ \
-          2>/dev/null | grep '\.ko' | sed 's/\.ko//' | tr '\n' ':' | sed 's/:$//')" \
+    -m "$(find /lib/modules/"${KERNEL_VERSION}"/kernel/drivers/ata/ \
+               /lib/modules/"${KERNEL_VERSION}"/kernel/drivers/scsi/ \
+          -name '*.ko' -printf '%f\n' 2>/dev/null \
+          | sed 's/\.ko//' | tr '\n' ':' | sed 's/:$//')" \
     -o "/boot/initrd-xanmod-${KERNEL_VERSION}.gz" \
     2>/dev/null || \
   mkinitrd \
