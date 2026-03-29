@@ -1,16 +1,13 @@
 # hardware/asus-rog/series
 # Enable with: ENABLE_ROG=1 or profile=rog
 #
-# Upstream status summary:
-#   001-asus-wmi-fan-curve-fix.patch   — UPSTREAM in 5.17, skip on 6.x
-#   002-rog-x13-tablet-mode.patch      — NOT upstream, needs 6.x rebase
+# Upstream status (as of 6.19):
+#   001-asus-wmi-fan-curve-fix.patch   — upstream 5.17, skip on 6.x
+#   002-rog-x13-tablet-mode.patch      — upstream 6.1-6.5, skip on 6.x
 #
-# The fan curve fix (001) is already in 6.x mainline. Kept for LTS use only.
-# 002 (ROG x13 tablet mode) requires rebase against current 6.x amd-sfh
-# driver structure before it will apply cleanly. See patch header for details.
-
-# Fan curve probe regression fix (upstream 5.17 — skip on 6.x)
-# 001-asus-wmi-fan-curve-fix.patch
-
-# ROG Flow X13 tablet mode — NOT upstream, uncomment after 6.x rebase
-# 002-rog-x13-tablet-mode.patch
+# Both patches are fully present in 6.x mainline. No patches need to be
+# applied for ROG hardware on 6.x — the Kconfig fragment (configs/hardware/
+# asus-rog.config) and the upstream kernel code are sufficient.
+#
+# This series file is intentionally empty for 6.x targets.
+# Patches are kept as reference for older LTS kernels (< 5.17).

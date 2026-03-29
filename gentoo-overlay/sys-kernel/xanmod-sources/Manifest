@@ -1,0 +1,9 @@
+# Manifest for sys-kernel/xanmod-sources
+#
+# This file must be regenerated with `ebuild xanmod-sources-6.19.ebuild manifest`
+# after cloning the overlay, or via `ego sync` if using eselect-repository.
+#
+# The DIST entry below is a placeholder — replace with the actual checksum
+# by running: ebuild xanmod-sources-6.19.ebuild manifest
+#
+# DIST linux-6.19.tar.xz <SIZE> BLAKE2B <HASH> SHA512 <HASH>
