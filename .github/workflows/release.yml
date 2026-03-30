@@ -13,6 +13,7 @@ on:
 jobs:
   build-arch:
     name: "Build Arch .pkg.tar.zst (${{ matrix.branch }})"
+    if: github.repository == 'Interested-Deving-1896/xanmod-unified-kernel'
     runs-on: ubuntu-latest
 
     strategy:
@@ -79,6 +80,7 @@ jobs:
   publish:
     name: Publish Release
     needs: [build-arch]
+    if: github.repository == 'Interested-Deving-1896/xanmod-unified-kernel'
     runs-on: ubuntu-latest
 
     steps:
