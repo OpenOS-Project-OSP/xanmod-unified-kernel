@@ -22,6 +22,7 @@ on:
 jobs:
   build:
     name: "XanMod ${{ matrix.branch }} arm64"
+    if: github.repository == 'Interested-Deving-1896/xanmod-unified-kernel'
     runs-on: ubuntu-24.04-arm
     continue-on-error: true
     strategy:
