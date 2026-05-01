@@ -108,7 +108,7 @@ back to package manager detection. Override with `DISTRO=<backend>`.
 
 ### Distro compatibility matrix
 
-Sourced from [fresh-eggs/SUPPORTED-DISTROS.md](https://github.com/pieroproietti/fresh-eggs/blob/main/SUPPORTED-DISTROS.md).
+Sourced from [fresh-eggs/SUPPORTED-DISTROS.md](https://github.com/Interested-Deving-1896/fresh-eggs/blob/main/SUPPORTED-DISTROS.md).
 
 #### ✅ Supported via `debian` backend
 Debian, Ubuntu, Kubuntu, Xubuntu, Lubuntu, Ubuntu MATE, Ubuntu Studio,
