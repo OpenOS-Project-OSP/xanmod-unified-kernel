@@ -1,4 +1,3 @@
-```yaml
 name: Build x86-64
 
 # Full kernel builds are expensive (1-3 hours, large runner resources).
@@ -105,4 +104,3 @@ jobs:
         with:
           files: dist/**/*.deb
           generate_release_notes: true
-```  
