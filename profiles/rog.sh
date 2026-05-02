@@ -39,3 +39,7 @@ NO_DEBUG=1
 # CachyOS scheduler — disabled by default (conflicts with upstream XanMod direction)
 # Set ENABLE_CACHY=1 on the command line to override.
 ENABLE_CACHY="${ENABLE_CACHY:-0}"
+
+# BTRFS+DwarFS framework — opt-in; requires btrfs-dwarfs-framework source
+# Set ENABLE_BDFS=1 on the command line or in a local override to enable.
+ENABLE_BDFS="${ENABLE_BDFS:-0}"

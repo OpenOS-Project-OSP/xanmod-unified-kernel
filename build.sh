@@ -21,11 +21,14 @@
 #   ENABLE_NET_PATCHES=1         Apply network patches
 #   ENABLE_CACHY=1               Apply CachyOS scheduler patch
 #   ENABLE_PARALLEL_BOOT=1       Apply parallel boot patch
+#   ENABLE_BDFS=1                Build btrfs_dwarfs module (btrfs-dwarfs-framework)
 #   NO_DEBUG=1                   Apply no-debug config fragment
 #   LZ4_SWAP=1                   Apply LZ4 swap config fragment
 #   VENDOR=amd|intel             Apply vendor-specific config fragment
 #   EXTRA_CONFIG=path            Merge an additional .config fragment
 #   FULL_CLONE=1                 Full git clone instead of shallow
+#   BDFS_SRC=path                Path to a btrfs-dwarfs-framework checkout
+#                                (default: auto-cloned into kernel/bdfs-src)
 
 set -euo pipefail
 
@@ -50,6 +53,8 @@ ENABLE_FS_PATCHES="${ENABLE_FS_PATCHES:-0}"
 ENABLE_NET_PATCHES="${ENABLE_NET_PATCHES:-0}"
 ENABLE_CACHY="${ENABLE_CACHY:-0}"
 ENABLE_PARALLEL_BOOT="${ENABLE_PARALLEL_BOOT:-0}"
+ENABLE_BDFS="${ENABLE_BDFS:-0}"
+BDFS_SRC="${BDFS_SRC:-${REPO_ROOT}/kernel/bdfs-src}"
 NO_DEBUG="${NO_DEBUG:-0}"
 LZ4_SWAP="${LZ4_SWAP:-0}"
 EXTRA_CONFIG="${EXTRA_CONFIG:-}"
@@ -92,6 +97,18 @@ detect_arch() {
     x86_64)          echo "x86" ;;
     aarch64|arm64)   echo "arm64" ;;
     riscv64)         echo "riscv" ;;
+    i386|i486|i586|i686)
+      # i386/i686 is not supported. XanMod and its upstream patch set target
+      # 64-bit kernels only. The last Linux kernel with native i386 support
+      # was 3.7.10 (2013); XanMod 6.x requires x86-64.
+      # If you need a modern kernel on 32-bit x86 hardware, consider:
+      #   - gray386linux (kernel 3.7.10 + musl): https://github.com/marmolak/gray386linux
+      #   - Debian i386 with a stock kernel (no XanMod patches)
+      echo "ERROR: i386/i686 is not supported by XanMod." >&2
+      echo "       XanMod 6.x requires a 64-bit (x86-64) CPU." >&2
+      echo "       The last Linux kernel with native i386 support was 3.7.10 (2013)." >&2
+      exit 1
+      ;;
     *)
       echo "ERROR: Unsupported host architecture: ${machine}" >&2
       echo "       Cross-compilation: set KARCH and CROSS_COMPILE manually." >&2
@@ -228,6 +245,7 @@ echo "    Features :"
 [[ "${ENABLE_PARALLEL_BOOT}" == "1" ]] && echo "               Parallel boot"
 [[ "${NO_DEBUG}"             == "1" ]] && echo "               No-debug"
 [[ "${LZ4_SWAP}"             == "1" ]] && echo "               LZ4 swap"
+[[ "${ENABLE_BDFS}"          == "1" ]] && echo "               BTRFS+DwarFS framework"
 echo ""
 
 # ── Step 1: Fetch kernel source ────────────────────────────────────────────────
@@ -243,7 +261,7 @@ fi
 
 # ── Step 2: Apply patches ──────────────────────────────────────────────────────
 export ENABLE_ROG ENABLE_MEDIATEK_BT ENABLE_FS_PATCHES \
-       ENABLE_NET_PATCHES ENABLE_CACHY ENABLE_PARALLEL_BOOT
+       ENABLE_NET_PATCHES ENABLE_CACHY ENABLE_PARALLEL_BOOT ENABLE_BDFS
 
 "${SCRIPTS_DIR}/apply-patches.sh" "${KERNEL_SRC}" "${PATCHES_DIR}"
 
@@ -284,6 +302,9 @@ FRAGMENTS+=("${CONFIGS_DIR}/features/performance.config")
 # Hardware fragments
 [[ "${ENABLE_ROG}"  == "1" ]] && FRAGMENTS+=("${CONFIGS_DIR}/hardware/asus-rog.config")
 
+# BTRFS+DwarFS framework
+[[ "${ENABLE_BDFS}" == "1" ]] && FRAGMENTS+=("${CONFIGS_DIR}/features/btrfs-dwarfs.config")
+
 # User-supplied extra fragment (last — highest priority)
 [[ -n "${EXTRA_CONFIG}" && -f "${EXTRA_CONFIG}" ]] && FRAGMENTS+=("${EXTRA_CONFIG}")
 
@@ -300,6 +321,13 @@ make -j"${JOBS}" ARCH="${KARCH}" olddefconfig
 echo ""
 echo "==> Building kernel (jobs: ${JOBS})"
 time make -j"${JOBS}" ARCH="${KARCH}" ${CROSS_COMPILE:+CROSS_COMPILE="${CROSS_COMPILE}"}
+
+# ── Step 4b: Build btrfs_dwarfs out-of-tree module ────────────────────────────
+if [[ "${ENABLE_BDFS}" == "1" ]]; then
+  echo ""
+  echo "==> Building btrfs_dwarfs module"
+  "${SCRIPTS_DIR}/build-bdfs.sh" "${KERNEL_SRC}" "${BDFS_SRC}"
+fi
 
 # ── Step 5: Install ───────────────────────────────────────────────────────────
 if [[ "${DO_INSTALL}" == "1" ]]; then

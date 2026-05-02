@@ -96,6 +96,7 @@ check_patch() {
   if [[ -z "${git_match}" && -n "${changed_files}" ]]; then
     first_file=$(echo "${changed_files}" | head -1)
     basename_file=$(basename "${first_file}" .c)
+    # shellcheck disable=SC2034  # reserved for future verdict logic
     symbol_match=$(git -C "${KERNEL_SRC}" log --oneline --all \
       --grep="${basename_file}" 2>/dev/null | head -3)
   fi

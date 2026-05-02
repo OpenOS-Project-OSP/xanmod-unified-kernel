@@ -1,6 +1,9 @@
 # Kernel source tree (fetched by kernel/fetch.sh)
 kernel/src/
 
+# btrfs-dwarfs-framework checkout (auto-cloned by scripts/build-bdfs.sh)
+kernel/bdfs-src/
+
 # Build artifacts
 *.deb
 *.rpm

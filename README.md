@@ -77,6 +77,8 @@ All flags are environment variables. Set them on the command line or in a profil
 | `ENABLE_NET_PATCHES` | `0` | Network patches |
 | `ENABLE_CACHY` | `0` | CachyOS scheduler patch |
 | `ENABLE_PARALLEL_BOOT` | `0` | Parallel boot patch |
+| `ENABLE_BDFS` | `0` | Build + install `btrfs_dwarfs` module ([btrfs-dwarfs-framework](https://github.com/Interested-Deving-1896/btrfs-dwarfs-framework)) |
+| `BDFS_SRC` | `kernel/bdfs-src` | Path to btrfs-dwarfs-framework checkout (auto-cloned if absent) |
 | `NO_DEBUG` | `0` | Disable debug/tracing overhead |
 | `LZ4_SWAP` | `0` | LZ4 compressed swap |
 | `EXTRA_CONFIG` | — | Path to an additional .config fragment |
@@ -203,6 +205,36 @@ which patches need porting.
 
 ---
 
+## BTRFS+DwarFS framework
+
+Setting `ENABLE_BDFS=1` integrates the
+[btrfs-dwarfs-framework](https://github.com/Interested-Deving-1896/btrfs-dwarfs-framework)
+as an out-of-tree kernel module alongside the XanMod kernel build.
+
+```bash
+# Build XanMod + btrfs_dwarfs module
+ENABLE_BDFS=1 ./build.sh --profile desktop
+
+# Point to an existing checkout instead of auto-cloning
+ENABLE_BDFS=1 BDFS_SRC=~/src/btrfs-dwarfs-framework ./build.sh
+```
+
+What happens when `ENABLE_BDFS=1`:
+
+1. `configs/features/btrfs-dwarfs.config` is merged — sets `CONFIG_BTRFS_DWARFS=m`
+   (depends on `CONFIG_BTRFS_FS` and `CONFIG_FUSE_FS`, both present in base configs).
+2. After the kernel build, `scripts/build-bdfs.sh` builds the `btrfs_dwarfs.ko`
+   module against the just-built kernel tree. The framework source is auto-cloned
+   into `kernel/bdfs-src/` if `BDFS_SRC` is not set.
+3. During install, `packaging/lib/install-bdfs.sh` copies the `.ko` into
+   `/lib/modules/<version>/extra/` and runs `depmod -a`.
+
+The userspace daemon and CLI from btrfs-dwarfs-framework are not built or
+installed by this repo — build them separately with `make userspace` in the
+framework checkout.
+
+---
+
 ## Repository layout
 
 ```
@@ -210,7 +242,8 @@ xanmod-unified/
 ├── build.sh                    Main entry point
 ├── kernel/
 │   ├── fetch.sh                Clone/update gitlab.com/xanmod/linux
-│   └── src/                    Kernel source tree (git-ignored)
+│   ├── src/                    Kernel source tree (git-ignored)
+│   └── bdfs-src/               btrfs-dwarfs-framework checkout (git-ignored, auto-cloned)
 ├── patches/                    Patch sets by category
 │   ├── core/                   Applied unconditionally
 │   ├── hardware/{asus-rog,mediatek-bt}/
@@ -220,14 +253,18 @@ xanmod-unified/
 │   ├── base/                   Per-arch base configs
 │   ├── arch/                   CPU vendor overrides
 │   ├── features/               Optional feature fragments
+│   │   └── btrfs-dwarfs.config Enables CONFIG_BTRFS_DWARFS=m
 │   └── hardware/               Hardware-specific fragments
 ├── profiles/                   Named build profiles
 │   ├── rog.sh  desktop.sh  server.sh  rt.sh  arm64.sh
 │   └── README.md
 ├── packaging/                  Per-distro install scripts
-│   ├── debian/  arch/  gentoo/  rpm/  generic/
+│   ├── debian/  arch/  gentoo/  rpm/  alpine/  void/  slackware/  generic/
+│   └── lib/
+│       └── install-bdfs.sh     Shared btrfs_dwarfs module install helper
 ├── scripts/
-│   └── apply-patches.sh        Patch application driver
+│   ├── apply-patches.sh        Patch application driver
+│   └── build-bdfs.sh           btrfs_dwarfs out-of-tree module build
 ├── ci/
 │   └── .github/workflows/      GitHub Actions
 └── .gitlab-ci.yml              GitLab CI

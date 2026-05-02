@@ -14,6 +14,7 @@
 #   ENABLE_NET_PATCHES=1    apply patches/net/
 #   ENABLE_CACHY=1          apply patches/sched/
 #   ENABLE_PARALLEL_BOOT=1  apply patches/boot/
+#   ENABLE_BDFS=1           (no in-tree patches; module built out-of-tree by build-bdfs.sh)
 
 set -euo pipefail
 

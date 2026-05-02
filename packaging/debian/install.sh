@@ -20,6 +20,12 @@ set -euo pipefail
 KERNEL_SRC="${KERNEL_SRC:?KERNEL_SRC not set}"
 KARCH="${KARCH:?KARCH not set}"
 APT_MODE="${1:-}"
+ENABLE_BDFS="${ENABLE_BDFS:-0}"
+BDFS_SRC="${BDFS_SRC:-}"
+
+# shellcheck source=../lib/install-bdfs.sh
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+source "${REPO_ROOT}/packaging/lib/install-bdfs.sh"
 
 # ── Deepin immutable filesystem check ─────────────────────────────────────────
 # Deepin Linux uses an immutable root filesystem by default. Installing a
@@ -76,5 +82,11 @@ DEB_DIR="$(dirname "${KERNEL_SRC}")"
 echo "==> Installing generated .deb packages from ${DEB_DIR}"
 dpkg -i "${DEB_DIR}"/linux-image-*.deb "${DEB_DIR}"/linux-headers-*.deb 2>/dev/null || true
 apt-get install -f -y   # fix any dependency issues
+
+# Install btrfs_dwarfs out-of-tree module if requested
+if [[ "${ENABLE_BDFS}" == "1" ]]; then
+  echo "  Installing btrfs_dwarfs module..."
+  install_bdfs_module "${KERNEL_VERSION}"
+fi
 
 echo "==> Debian install complete. Reboot to use kernel ${KERNEL_VERSION}."
