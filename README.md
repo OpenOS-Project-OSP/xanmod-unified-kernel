@@ -60,17 +60,17 @@ See [AGENTS.md](AGENTS.md) for full build system documentation.
 ## CI
 
 <!-- AI:start:ci -->
-The repository uses GitHub Actions for continuous integration and automation. Below are the relevant workflows:
+The repository uses GitHub Actions for continuous integration. Below are the relevant workflows:
 
-- **build.yml**: Builds the XanMod kernel for specified distributions and architectures. No secrets required.
-- **release.yml**: Publishes built kernel packages as a GitHub Release. Requires `GITHUB_TOKEN`.
-- **lint.yml**: Runs shellcheck and other linters on scripts and configurations. No secrets required.
-- **cleanup-pollution.yml**: Cleans up temporary files and artifacts from previous runs. No secrets required.
-- **mirror-artifacts.yml**: Mirrors build artifacts to external storage. Requires `STORAGE_ACCESS_KEY` and `STORAGE_SECRET_KEY`.
-- **sync-to-gitlab.yml**: Syncs the repository to a GitLab mirror. Requires `GITLAB_TOKEN`.
-- **token-health.yml**: Monitors the health and expiration of API tokens. Requires `GITHUB_TOKEN` and `GITLAB_TOKEN`.
+- **build.yml**: Builds XanMod kernel `.deb` packages for specified distributions and architectures. No secrets required.
+- **release.yml**: Publishes built packages as GitHub Releases. Requires `GH_TOKEN` for authentication.
+- **lint.yml**: Runs shell linting checks on scripts and configurations. No secrets required.
+- **mirror-artifacts.yml**: Mirrors build artifacts to external storage. Requires `STORAGE_KEY` and `STORAGE_SECRET`.
+- **cleanup-pollution.yml**: Cleans up temporary files and directories post-build. No secrets required.
+- **check-gitlab-sync.yml**: Verifies synchronization status with the upstream GitLab repository. Requires `GITLAB_TOKEN`.
+- **rotate-token.yml**: Rotates API tokens for external integrations. Requires `ADMIN_TOKEN`.
 
-Refer to `.github/workflows/` for additional workflows and their configurations.
+Secrets must be configured in the repository settings for workflows requiring authentication.
 <!-- AI:end:ci -->
 
 ## Mirror chain
