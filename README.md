@@ -3,7 +3,7 @@
 [![Built with Ona](https://ona.com/build-with-ona.svg)](https://app.ona.com/#https://github.com/Interested-Deving-1896/xanmod-unified-kernel)
 
 <!-- AI:start:what-it-does -->
-This project provides a build system for creating XanMod Linux kernel packages in a distribution-agnostic and architecture-agnostic manner. It allows users to compile `.deb` packages for various Linux distributions (e.g., Debian, Ubuntu) and architectures (e.g., amd64, arm64). It is intended for developers, maintainers, and advanced users who need a streamlined way to build and distribute custom XanMod kernels.
+This project provides a build system for creating XanMod Linux kernel packages in a distribution-agnostic and architecture-agnostic manner. It automates the process of building `.deb` packages for multiple Linux distributions and architectures, streamlining kernel deployment for developers and system integrators. It supports various workflows, including building OCI images and publishing releases.
 <!-- AI:end:what-it-does -->
 
 ## Architecture
