@@ -92,7 +92,7 @@ jobs:
     timeout-minutes: 175
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Monitor quota / watch run
         env:
