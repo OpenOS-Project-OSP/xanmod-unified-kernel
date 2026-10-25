@@ -47,7 +47,7 @@ jobs:
             arch: arm64
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install build dependencies
         run: |
@@ -68,7 +68,7 @@ jobs:
         run: bash scripts/build.sh
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: kernel-debs-${{ matrix.distro }}-${{ matrix.arch }}
           path: output/${{ matrix.distro }}/${{ matrix.arch }}/*.deb
@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install build dependencies
         run: |
@@ -101,7 +101,7 @@ jobs:
         run: bash scripts/build.sh
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: kernel-debs-${{ inputs.distro }}-${{ inputs.arch }}
           path: output/${{ inputs.distro }}/${{ inputs.arch }}/*.deb

@@ -21,7 +21,7 @@ jobs:
       upstream_sha: ${{ steps.check.outputs.upstream_sha }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Check upstream XanMod HEAD
         id: check
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Update upstream SHA state
         env:
